@@ -1,5 +1,6 @@
 import math
 from anytree import Node, RenderTree
+from anytree.exporter import DotExporter
 
 class State():
 	def __init__(self, cannibalLeft, missionaryLeft, boat, cannibalRight, missionaryRight):
@@ -33,7 +34,7 @@ class State():
 		return self.tree_node
 
 	def __str__(self):
-		return "("+ str(self.missionaryLeft) + "," + str(self.cannibalLeft) + "," + ("0" if (self.boat == "left") else "1") + ")" + (" <- Goal State" if self.is_goal() else "")
+		return "("+ str(self.missionaryLeft) + "," + str(self.cannibalLeft) + "," + str(self.missionaryRight) + "," + str(self.cannibalRight) + "," + ("0" if (self.boat == "left") else "1") + ")" + (" <- Goal State" if self.is_goal() else "")
 
 	def __eq__(self, other):
 		return self.cannibalLeft == other.cannibalLeft and self.missionaryLeft == other.missionaryLeft \
@@ -56,64 +57,63 @@ def get_children(cur_state):
 		## Two cannibals cross left to right.
 		new_state = State(cur_state.cannibalLeft - 2, cur_state.missionaryLeft, 'right',
                                   cur_state.cannibalRight + 2, cur_state.missionaryRight)
-		if new_state.is_valid():
+		if new_state.is_valid() and new_state != cur_state:
 			new_state.parent= cur_state
 			children.append(new_state)
 		
 		## One missionary and one cannibal cross left to right.
 		new_state = State(cur_state.cannibalLeft - 1, cur_state.missionaryLeft - 1, 'right',
                                   cur_state.cannibalRight + 1, cur_state.missionaryRight + 1)
-		if new_state.is_valid():
+		if new_state.is_valid() and new_state != cur_state:
 			new_state.parent= cur_state
 			children.append(new_state)
 		
 		## One missionary crosses left to right.
 		new_state = State(cur_state.cannibalLeft, cur_state.missionaryLeft - 1, 'right',
                                   cur_state.cannibalRight, cur_state.missionaryRight + 1)
-		if new_state.is_valid():
+		if new_state.is_valid() and new_state != cur_state:
 			new_state.parent= cur_state
 			children.append(new_state)
 		
 		## One cannibal crosses left to right.
 		new_state = State(cur_state.cannibalLeft - 1, cur_state.missionaryLeft, 'right',
                                   cur_state.cannibalRight + 1, cur_state.missionaryRight)
-		if new_state.is_valid():
+		if new_state.is_valid() and new_state != cur_state:
 			new_state.parent= cur_state
 			children.append(new_state)
 	else:
-		
 		## Two missionaries cross right to left.
 		new_state = State(cur_state.cannibalLeft, cur_state.missionaryLeft + 2, 'left',
                                   cur_state.cannibalRight, cur_state.missionaryRight - 2)
-		if new_state.is_valid():
+		if new_state.is_valid() and new_state != cur_state:
 			new_state.parent= cur_state
 			children.append(new_state)
 		
 		## Two cannibals cross right to left.
 		new_state = State(cur_state.cannibalLeft + 2, cur_state.missionaryLeft, 'left',
                                   cur_state.cannibalRight - 2, cur_state.missionaryRight)
-		if new_state.is_valid():
+		if new_state.is_valid() and new_state != cur_state:
 			new_state.parent= cur_state
 			children.append(new_state)
 		
 		## One missionary and one cannibal cross right to left.
 		new_state = State(cur_state.cannibalLeft + 1, cur_state.missionaryLeft + 1, 'left',
                                   cur_state.cannibalRight - 1, cur_state.missionaryRight - 1)
-		if new_state.is_valid():
+		if new_state.is_valid() and new_state != cur_state:
 			new_state.parent= cur_state
 			children.append(new_state)
 		
 		## One missionary crosses right to left.
 		new_state = State(cur_state.cannibalLeft, cur_state.missionaryLeft + 1, 'left',
                                   cur_state.cannibalRight, cur_state.missionaryRight - 1)
-		if new_state.is_valid():
+		if new_state.is_valid() and new_state != cur_state:
 			new_state.parent= cur_state
 			children.append(new_state)
 
 		## One cannibal crosses right to left.
 		new_state = State(cur_state.cannibalLeft + 1, cur_state.missionaryLeft, 'left',
                                   cur_state.cannibalRight - 1, cur_state.missionaryRight)
-		if new_state.is_valid():
+		if new_state.is_valid() and new_state != cur_state:
 			new_state.parent = cur_state
 			children.append(new_state)
 	return children
@@ -163,6 +163,8 @@ def main():
 	# Printing Graph
 	for pre, fill, node in RenderTree(initial_state.get_tree_node()):
 		print("%s%s" %(pre,node.name))
+
+	DotExporter(initial_state.get_tree_node()).to_picture("mnc.png")
 
 # if called from the command line, call main()
 if __name__ == "__main__":
